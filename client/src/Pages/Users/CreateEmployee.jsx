@@ -38,26 +38,54 @@ const CreateUser = ({ open, setOpen, scroll }) => {
 
   //////////////////////////////////////// STATES /////////////////////////////////////
   const [employeeData, setEmployeeData] = useState(initialEmployeeState);
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    password: '',
+    phone: ''
+  });
 
   //////////////////////////////////////// USE EFFECTS /////////////////////////////////////
 
   //////////////////////////////////////// FUNCTIONS /////////////////////////////////////
+  const validateForm = () => {
+    const newErrors = {
+      firstName: !employeeData.firstName ? 'First name is required' : '',
+      lastName: !employeeData.lastName ? 'Last name is required' : '',
+      username: !employeeData.username ? 'Username is required' : '',
+      password: !employeeData.password ? 'Password is required' : '',
+      phone: !employeeData.phone ? 'Phone number is required' : ''
+    };
+    
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { firstName, lastName, username, password, phone, email } = employeeData
-    if (!firstName || !lastName || !username || !password || !phone  )
-      return alert("Make sure to provide all the fields")
-    dispatch(createEmployee(employeeData, setOpen));
-    setEmployeeData(initialEmployeeState)
+    if (validateForm()) {
+      dispatch(createEmployee(employeeData, setOpen));
+      setEmployeeData(initialEmployeeState);
+    }
   };
 
   const handleChange = (field, value) => {
-    setEmployeeData((prevFilters) => ({ ...prevFilters, [field]: value, }));
+    setEmployeeData((prevData) => ({ ...prevData, [field]: value }));
+    // Clear error when user starts typing
+    setErrors(prev => ({...prev, [field]: ''}));
   };
 
   const handleClose = () => {
     setOpen(false);
-    setEmployeeData(initialEmployeeState)
+    setEmployeeData(initialEmployeeState);
+    setErrors({
+      firstName: '',
+      lastName: '',
+      username: '',
+      password: '',
+      phone: ''
+    });
   };
 
   return (
@@ -81,7 +109,7 @@ const CreateUser = ({ open, setOpen, scroll }) => {
           <div className="flex flex-col gap-2 p-3 text-gray-500 font-primary">
             <div className="text-xl flex justify-start items-center gap-2 font-normal">
               <PiNotepad size={23} />
-              <span>Employee Detials</span>
+              <span>Employee Details</span>
             </div>
             <Divider />
             <table className="mt-4">
@@ -93,6 +121,8 @@ const CreateUser = ({ open, setOpen, scroll }) => {
                     fullWidth
                     value={employeeData.firstName}
                     onChange={(e) => handleChange('firstName', e.target.value)}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName}
                   />
                 </td>
               </tr>
@@ -104,6 +134,8 @@ const CreateUser = ({ open, setOpen, scroll }) => {
                     fullWidth
                     value={employeeData.lastName}
                     onChange={(e) => handleChange('lastName', e.target.value)}
+                    error={!!errors.lastName}
+                    helperText={errors.lastName}
                   />
                 </td>
               </tr>
@@ -115,6 +147,8 @@ const CreateUser = ({ open, setOpen, scroll }) => {
                     fullWidth
                     value={employeeData.username}
                     onChange={(e) => handleChange('username', e.target.value)}
+                    error={!!errors.username}
+                    helperText={errors.username}
                   />
                 </td>
               </tr>
@@ -139,6 +173,8 @@ const CreateUser = ({ open, setOpen, scroll }) => {
                     onChange={(e) => handleChange("password", e.target.value)}
                     size="small"
                     fullWidth
+                    error={!!errors.password}
+                    helperText={errors.password}
                   />
                 </td>
               </tr>
@@ -151,6 +187,8 @@ const CreateUser = ({ open, setOpen, scroll }) => {
                     value={employeeData.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
                     fullWidth
+                    error={!!errors.phone}
+                    helperText={errors.phone}
                   />
                 </td>
               </tr>
@@ -174,7 +212,6 @@ const CreateUser = ({ open, setOpen, scroll }) => {
         </DialogActions>
       </Dialog>
     </div>
-
   );
 };
 
