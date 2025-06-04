@@ -2,17 +2,15 @@ import React, { useEffect, useState } from "react";
 import Topbar from "./Topbar";
 import { Table } from "../../Components";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getClients, getEmployeeClients } from "../../redux/action/user";
-import { getClientsReducer, getUserReducer } from "../../redux/reducer/user";
-import { Tooltip, styled } from "@mui/material";
-import { PiDotsThreeOutlineThin, PiTrashLight } from "react-icons/pi";
-import { IoOpenOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
-import { Dropdown, Menu, MenuButton, MenuItem, menuItemClasses } from "@mui/base";
-import Filter from "./Filter";
-import User from "./User";
+import { getUserReducer } from "../../redux/reducer/user";
+import { Tooltip } from "@mui/material";
+import { PiTrashLight } from "react-icons/pi";
+
 import DeleteClient from "./Delete";
+import CreateClient from "./CreateClient";
+import Edit from "./Edit";
 
 const blue = {
   100: "#DAECFF",
@@ -35,54 +33,6 @@ const grey = {
   800: "#32383f",
   900: "#24292f",
 };
-
-const StyledListbox = styled("ul")(
-  ({ theme }) => `
-      font-family: IBM Plex Sans, sans-serif;
-      font-size: 0.875rem;
-      box-sizing: border-box;
-      transition:all;
-      padding: 10px;
-      margin: 12px 0;
-      width: auto;
-      border-radius: 12px;
-      overflow: auto;
-      outline: 0px;
-      background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
-      border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
-      color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-      box-shadow: 0px 4px 30px ${theme.palette.mode === "dark" ? grey[900] : grey[200]};
-      z-index: 1;
-      `
-);
-
-const StyledMenuItem = styled(MenuItem)(
-  ({ theme }) => `
-      list-style: none;
-      padding: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-      &:last-of-type {
-        border-bottom: none;
-      }
-    
-      &.${menuItemClasses.focusVisible} {
-        outline: 3px solid ${theme.palette.mode === "dark" ? blue[600] : blue[200]};
-        background-color: ${theme.palette.mode === "dark" ? grey[800] : grey[100]};
-        color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-      }
-    
-      &.${menuItemClasses.disabled} {
-        color: ${theme.palette.mode === "dark" ? grey[700] : grey[400]};
-      }
-    
-      &:hover:not(.${menuItemClasses.disabled}) {
-        background-color: ${theme.palette.mode === "dark" ? grey[800] : grey[100]};
-        color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-      }
-      `
-);
 
 const Clients = () => {
   ////////////////////////////////////// VARIABLES /////////////////////////////////////
@@ -144,7 +94,7 @@ const Clients = () => {
             <Tooltip placement="top" title="Delete" arrow>
               {" "}
               <PiTrashLight
-                onClick={() => handleOpenDeleteModal(params.row._id)}
+                onClick={() => handleDeleteOpen(params.row)}
                 className="cursor-pointer text-red-500 text-[23px] hover:text-red-400"
               />
             </Tooltip>
@@ -160,6 +110,9 @@ const Clients = () => {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [openFilters, setOpenFilters] = useState("");
   const [openUser, setOpenUser] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   ////////////////////////////////////// USE EFFECTS ////////////////////////////////////
   useEffect(() => {
@@ -174,30 +127,50 @@ const Clients = () => {
   const handleClickOpen = () => {
     setOpenUser(true);
   };
+
   const handleOpenEditModal = (employee) => {
     dispatch(getUserReducer(employee));
     setOpenEditModal(true);
   };
-  const handleOpenDeleteModal = (userId) => {
-    setSelectedUserId(userId);
+
+  const handleDeleteOpen = (client) => {
+    setSelectedClient(client);
     setOpenDeleteModal(true);
+  };
+
+  const handleCreateOpen = () => {
+    setCreateOpen(true);
   };
 
   return (
     <div className="w-full">
+      <div className="flex flex-col gap-[20px]">
+        <Topbar
+          openFilters={openFilters}
+          setOpenFilters={setOpenFilters}
+          isFiltered={isFiltered}
+          setIsFiltered={setIsFiltered}
+          showAddClient={true}
+          onAddClick={handleCreateOpen}
+        />
 
-      <DeleteClient open={openDeleteModal} setOpen={setOpenDeleteModal} userId={selectedUserId} />
-      <Filter open={openFilters} setOpen={setOpenFilters} />
-      <User open={openUser} setOpen={setOpenUser} />
+        <Table
+          rows={clients}
+          columns={columns}
+          isFetching={isFetching}
+          error={error}
+          rowsPerPage={10}
+        />
 
-      <Topbar />
-      <Table
-        rows={clients}
-        columns={columns}
-        isFetching={isFetching}
-        error={error}
-        rowsPerPage={10}
-      />
+        <CreateClient open={createOpen} setOpen={setCreateOpen} scroll="paper" />
+        <DeleteClient open={openDeleteModal} setOpen={setOpenDeleteModal} userId={selectedUserId} />
+        <Edit
+          open={openEditModal}
+          setOpen={setOpenEditModal}
+          selectedUser={selectedClient}
+          type="client"
+        />
+      </div>
     </div>
   );
 };
