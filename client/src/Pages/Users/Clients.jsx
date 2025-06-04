@@ -7,10 +7,11 @@ import { getClients, getEmployeeClients } from "../../redux/action/user";
 import { getUserReducer } from "../../redux/reducer/user";
 import { Tooltip } from "@mui/material";
 import { PiTrashLight } from "react-icons/pi";
+import { CiEdit } from "react-icons/ci";
 
 import DeleteClient from "./Delete";
 import CreateClient from "./CreateClient";
-import Edit from "./Edit";
+import ClientEdit from "./ClientEdit";
 
 const blue = {
   100: "#DAECFF",
@@ -89,16 +90,22 @@ const Clients = () => {
       headerClassName: "super-app-theme--header",
       renderCell: (params) => (
         <div className="flex gap-[10px]">
-          {
-            loggedUser?.role != 'employee' &&
-            <Tooltip placement="top" title="Delete" arrow>
-              {" "}
-              <PiTrashLight
-                onClick={() => handleDeleteOpen(params.row)}
-                className="cursor-pointer text-red-500 text-[23px] hover:text-red-400"
-              />
-            </Tooltip>
-          }
+          {loggedUser?.role != 'employee' && (
+            <>
+              <Tooltip placement="top" title="Edit" arrow>
+                <CiEdit
+                  onClick={() => handleOpenEditModal(params.row)}
+                  className="cursor-pointer text-green-500 text-[23px] hover:text-green-600"
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="Delete" arrow>
+                <PiTrashLight
+                  onClick={() => handleDeleteOpen(params.row)}
+                  className="cursor-pointer text-red-500 text-[23px] hover:text-red-400"
+                />
+              </Tooltip>
+            </>
+          )}
         </div>
       ),
     },
@@ -117,10 +124,8 @@ const Clients = () => {
   ////////////////////////////////////// USE EFFECTS ////////////////////////////////////
   useEffect(() => {
     loggedUser.role == 'employee'
-      ?
-      dispatch(getEmployeeClients())
-      :
-      dispatch(getClients());
+      ? dispatch(getEmployeeClients())
+      : dispatch(getClients());
   }, []);
 
   ////////////////////////////////////// FUNCTIONS //////////////////////////////////////////
@@ -128,8 +133,8 @@ const Clients = () => {
     setOpenUser(true);
   };
 
-  const handleOpenEditModal = (employee) => {
-    dispatch(getUserReducer(employee));
+  const handleOpenEditModal = (client) => {
+    setSelectedClient(client);
     setOpenEditModal(true);
   };
 
@@ -164,11 +169,10 @@ const Clients = () => {
 
         <CreateClient open={createOpen} setOpen={setCreateOpen} scroll="paper" />
         <DeleteClient open={openDeleteModal} setOpen={setOpenDeleteModal} userId={selectedUserId} />
-        <Edit
+        <ClientEdit
           open={openEditModal}
           setOpen={setOpenEditModal}
-          selectedUser={selectedClient}
-          type="client"
+          selectedClient={selectedClient}
         />
       </div>
     </div>
