@@ -135,7 +135,7 @@ const ClientNavbar = () => {
         {/* Center section */}
         <div>
           <p className="text-sky-400 text-xl gap-1 flex items-center sm:visible invisible">
-            <PiTimerLight className="text-[25px]" /> {date.toLocaleTimeString()}
+            <PiTimerLight className="text-[25px]" /> {date.toLocaleTimeString()} ({Intl.DateTimeFormat().resolvedOptions().timeZone})
           </p>
         </div>
 
